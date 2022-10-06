@@ -14,7 +14,7 @@
 
             <Button Content="{Binding SourceDocumentURL}" 
                     Command="{Binding ViewDocumentCommand}" 
-                   Visibility="{Binding Path=SourceDoumentURL, Converter={StaticResource NullStringToVisibilityConverter}}"/>
+                   Visibility="{Binding Path=SourceDocumentURL, Converter={StaticResource NullStringToVisibilityConverter}}"/>
 
         </DataTemplate>
         <DataTemplate x:Key="AnswerTextCellTemplate">

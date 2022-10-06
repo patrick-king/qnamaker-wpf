@@ -1,5 +1,4 @@
-﻿using Microsoft.Azure.CognitiveServices.Knowledge.QnAMaker.Models;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,18 +8,24 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using QnAMakerRuntimeAPI.UICore;
 using QnAMakerRuntimeAPI.Providers;
+using Azure.AI.Language.QuestionAnswering;
+using Azure;
+using System.IO;
 
 namespace QnAMakerRuntimeAPI.ViewModel
 {
 	public class QnAViewModel : ViewModelBase, IQnAViewModel
 	{
         private IConfiguration _config;
+		private string _localDocsLib;
 		public QnAViewModel(IConfiguration config)
 		{
             _config = config;
             SearchResults = new ObservableCollection<HelpResultItem>();
 
             SubmitQuestionCommand = new RelayCommand(GetHelpResults_Execute, GetHelpResults_CanExecute);
+
+			_localDocsLib = _config["HelpDocumentsPath"];
 		}
 
 		private string mQuestionText;
@@ -125,17 +130,18 @@ namespace QnAMakerRuntimeAPI.ViewModel
                 IQnAGateway qnag = new QnAGateway(_config);
 
 				
-                Task<QnASearchResultList> searchTask = Task.Run(() => qnag.AnswerQuestion(QuestionText, "user1", 5 ));
-                QnASearchResultList results = searchTask.Result;
+                Task<AnswersResult> searchTask = Task.Run(() => qnag.AnswerQuestion(QuestionText, "user1", 5 ));
+                AnswersResult results = searchTask.Result;
 
                 var answerResults = new List<HelpResultItem>();
                 foreach (var answer in results.Answers)
                 {
-                    var theResult = new HelpResultItem()
-                    {
-                        MatchedText = answer.Answer,
-                        RelevancyScore = answer.Score.GetValueOrDefault(),
-                        SourceDocumentURL = answer.Source,
+					var theResult = new HelpResultItem()
+					{
+						MatchedText = answer.Answer,
+						RelevancyScore = answer.Confidence.GetValueOrDefault() * 100,
+						SourceDocumentURL = answer.Source,
+						LocalDocumentURL = (_localDocsLib != null && answer.Source != null) ? Path.Combine(_localDocsLib, answer.Source) : null
                     };
                     answerResults.Add(theResult);
                 }

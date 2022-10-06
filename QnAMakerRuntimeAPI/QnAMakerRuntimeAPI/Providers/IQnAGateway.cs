@@ -1,10 +1,10 @@
-﻿using Microsoft.Azure.CognitiveServices.Knowledge.QnAMaker.Models;
+﻿using Azure.AI.Language.QuestionAnswering;
 using System.Threading.Tasks;
 
 namespace QnAMakerRuntimeAPI.Providers
 {
     public interface IQnAGateway
     {
-        Task<QnASearchResultList> AnswerQuestion(string question, string userId = "user1", int resultCount = 1);
+        Task<AnswersResult> AnswerQuestion(string question, string userId = "user1", int resultCount = 1);
     }
 }
